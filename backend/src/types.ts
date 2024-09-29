@@ -1,6 +1,4 @@
 export type ContactInfo = {
-    id: string;
-    name: string;
     emailAddress: string;
     phoneNumber?: string; // Optional field
 };
@@ -16,7 +14,6 @@ export type Job = {
     description: string;
     requirements: string[];
     poster: User;
-    creationDate: Date;
     auctionStartDate: Date;
     auctionEndDate: Date;
 };

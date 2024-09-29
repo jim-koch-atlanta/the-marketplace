@@ -5,9 +5,9 @@ import { Bid, Job, User }  from './types';
 export class DatabaseManager {
     private db!: Database;
 
-    constructor(private dbFilePath: string) {}
+    constructor(private dbFilePath: string) { }
 
-    async initialize() {
+    public async initialize() {
         // Open or create the SQLite database file
         this.db = await open({
             filename: this.dbFilePath,
@@ -22,6 +22,11 @@ export class DatabaseManager {
         }
     }
 
+    // Getter for the db connection (only for testing purposes)
+    public getDatabase(): Database {
+        return this.db;
+    }
+
     private async checkVersion(): Promise<number> {
         // Create version table if it doesn't exist
         await this.db.exec(`
@@ -33,7 +38,7 @@ export class DatabaseManager {
         const row = await this.db.get("SELECT version FROM version");
 
         if (!row) {
-            console.log("Version table not found, returning 0.");
+            console.log("Version value not found, returning 0.");
             return 0;
         } else {
             console.log(`Database version: ${row.version}`);
@@ -87,7 +92,7 @@ export class DatabaseManager {
         }
     }
 
-    async insertUser(user: User) {
+    public async insertUser(user: User) {
         const { id, name, contactInfo } = user;
         const { emailAddress, phoneNumber } = contactInfo;
 
@@ -99,12 +104,12 @@ export class DatabaseManager {
         console.log("User inserted successfully.");
     }
 
-    async insertJob(job: Job) {
+    public async insertJob(job: Job) {
         const { id, description, requirements, poster, auctionStartDate, auctionEndDate } = job;
 
         await this.db.run(`
             INSERT INTO jobs (id, description, requirements, posterId, creationDate, auctionStartDate, auctionEndDate)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `, [
             id,
             description,
@@ -118,7 +123,7 @@ export class DatabaseManager {
         console.log("Job inserted successfully.");
     }
 
-    async insertBid(bid: Bid) {
+    public async insertBid(bid: Bid) {
         const { id, jobId, amount, bidder } = bid;
 
         await this.db.run(`
@@ -129,7 +134,7 @@ export class DatabaseManager {
         console.log("Job bid inserted successfully.");
     }
 
-    private rowsToJobs(rows: any[]): Job[] {
+    private static rowsToJobs(rows: any[]): Job[] {
         // Map the rows to Job objects
         const jobs: Job[] = rows.map((row) => {
             return {
@@ -146,7 +151,6 @@ export class DatabaseManager {
                         phoneNumber: row.posterPhoneNumber || undefined, // Handle optional phoneNumber
                     },
                 },
-                creationDate: new Date(row.creationDate),
                 auctionStartDate: new Date(row.auctionStartDate),
                 auctionEndDate: new Date(row.auctionEndDate),
             };
@@ -155,7 +159,7 @@ export class DatabaseManager {
         return jobs;
     }
 
-    async getJobs(): Promise<Job[]> {
+    public async getJobs(): Promise<Job[]> {
         const sql = `
             SELECT
                 jobs.id as jobId,
@@ -176,7 +180,7 @@ export class DatabaseManager {
             const rows = await this.db.all(sql);
     
             // Map the rows to Job objects
-            const jobs: Job[] = this.rowsToJobs(rows);
+            const jobs: Job[] = DatabaseManager.rowsToJobs(rows);
             return jobs;
 
         } catch (err) {
@@ -185,7 +189,7 @@ export class DatabaseManager {
         }
     }
 
-    async getJobsById(jobId: string): Promise<Job[]> {
+    public async getJobsById(jobId: string): Promise<Job[]> {
         const sql = `
             SELECT
                 jobs.id as jobId,
@@ -207,7 +211,7 @@ export class DatabaseManager {
             const rows = await this.db.all(sql, [jobId]);
     
             // Map the rows to Job objects
-            const jobs: Job[] = this.rowsToJobs(rows);
+            const jobs: Job[] = DatabaseManager.rowsToJobs(rows);
             return jobs;
         } catch (err) {
             console.error(`Error retrieving jobs by ID: ${JSON.stringify(err)}`);
@@ -215,7 +219,7 @@ export class DatabaseManager {
         }
     }
         
-    async getJobById(jobId: string): Promise<Job | null> {
+    public async getJobById(jobId: string): Promise<Job | null> {
         const jobs = await this.getJobsById(jobId);
     
         if (jobs.length > 0) {
@@ -225,7 +229,7 @@ export class DatabaseManager {
         return null; // Return null if no jobs are found
     }
 
-    async getMostRecentJobs(X: number): Promise<Job[]> {
+    public async getMostRecentJobs(numberOfJobs: number): Promise<Job[]> {
         const sql = `
             SELECT
                 jobs.id as jobId,
@@ -245,10 +249,10 @@ export class DatabaseManager {
         `;
     
         try {
-            const rows = await this.db.all(sql, [X]);
+            const rows = await this.db.all(sql, [numberOfJobs]);
     
             // Map the rows to Job objects
-            const jobs: Job[] = this.rowsToJobs(rows);
+            const jobs: Job[] = DatabaseManager.rowsToJobs(rows);
             return jobs;
         } catch (err) {
             console.error(`Error retrieving most recent jobs: ${JSON.stringify(err)}`);
@@ -256,7 +260,7 @@ export class DatabaseManager {
         }
     }
 
-    async getMostActiveJobs(X: number): Promise<Job[]> {
+    public async getMostActiveJobs(numberOfJobs: number): Promise<Job[]> {
         const sql = `
             SELECT
                 jobs.id as jobId,
@@ -269,20 +273,20 @@ export class DatabaseManager {
                 users.name as posterName,
                 users.emailAddress as posterEmailAddress,
                 users.phoneNumber as posterPhoneNumber,
-                COUNT(jobBids.id) as bidCount
+                COUNT(bids.id) as bidCount
             FROM jobs
             JOIN users ON jobs.posterId = users.id
-            LEFT JOIN jobBids ON jobs.id = jobBids.jobId
+            LEFT JOIN bids ON jobs.id = bids.jobId
             GROUP BY jobs.id, jobs.description, jobs.requirements, jobs.creationDate, jobs.auctionStartDate, jobs.auctionEndDate, users.id, users.name, users.emailAddress, users.phoneNumber
             ORDER BY bidCount DESC
             LIMIT ?;
         `;
     
         try {
-            const rows = await this.db.all(sql, [X]);
+            const rows = await this.db.all(sql, [numberOfJobs]);
     
             // Map the rows to Job objects
-            const jobs: Job[] = this.rowsToJobs(rows);
+            const jobs: Job[] = DatabaseManager.rowsToJobs(rows);
             return jobs;
         } catch (err) {
             console.error(`Error retrieving most active jobs: ${JSON.stringify(err)}`);
