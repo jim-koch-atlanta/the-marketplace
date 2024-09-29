@@ -1,8 +1,8 @@
 import request from 'supertest';
 import express from 'express';
-import { RestApi } from './RestApi'; // Adjust the path to where RestApi is located
-import { DatabaseManager } from './DatabaseManager'; // Adjust the path
-import { Job, Bid } from './types'; // Adjust the path
+import { RestApi } from './RestApi';
+import { DatabaseManager } from './DatabaseManager';
+import { Job, Bid } from './types';
 
 // Mock the DatabaseManager
 jest.mock('./DatabaseManager');
@@ -31,6 +31,32 @@ const mockJob2: Job =
 const mockJobs: Job[] = [
     mockJob1,
     mockJob2
+];
+
+// TODO: Find a better way to do this. Unit tests are failing with:
+/*
+    -     "auctionEndDate": 2024-09-29T21:22:16.088Z,
+    -     "auctionStartDate": 2024-09-29T21:22:16.088Z,
+    +     "auctionEndDate": "2024-09-29T21:22:16.088Z",
+    +     "auctionStartDate": "2024-09-29T21:22:16.088Z",
+*/
+const restMockJob1 =
+{
+    ...mockJob1,
+    auctionStartDate: mockJob1.auctionStartDate.toISOString(),
+    auctionEndDate: mockJob1.auctionEndDate.toISOString()
+};
+
+const restMockJob2 =
+{
+    ...mockJob2,
+    auctionStartDate: mockJob2.auctionStartDate.toISOString(),
+    auctionEndDate: mockJob2.auctionEndDate.toISOString()
+};
+
+const restMockJobs = [
+    restMockJob1,
+    restMockJob2,
 ];
 
 describe('RestApi', () => {
@@ -92,7 +118,7 @@ describe('RestApi', () => {
         const response = await request(expressApi).get('/api/jobs');
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(mockJobs);
+        expect(response.body).toEqual(restMockJobs);
         expect(dbManager.getJobs).toHaveBeenCalled();
     });
 
@@ -114,7 +140,7 @@ describe('RestApi', () => {
         const response = await request(expressApi).get('/api/jobs/job1');
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(mockJob1);
+        expect(response.body).toEqual(restMockJob1);
         expect(dbManager.getJobById).toHaveBeenCalledWith('job1');
     });
 
@@ -213,7 +239,7 @@ describe('RestApi', () => {
         const response = await request(expressApi).get('/api/jobs?filter=most_recent');
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(mockJobs);
+        expect(response.body).toEqual(restMockJobs);
         expect(dbManager.getMostRecentJobs).toHaveBeenCalledWith(10); // By default, limit is 10
     });
 
@@ -226,7 +252,7 @@ describe('RestApi', () => {
         const response = await request(expressApi).get('/api/jobs?filter=most_active');
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(mockJobs);
+        expect(response.body).toEqual(restMockJobs);
         expect(dbManager.getMostActiveJobs).toHaveBeenCalledWith(10); // By default, limit is 10
     });
 
@@ -239,7 +265,7 @@ describe('RestApi', () => {
         const response = await request(expressApi).get('/api/jobs?filter=most_recent&limit=1');
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([ mockJob1 ]);
+        expect(response.body).toEqual([ restMockJob1 ]);
         expect(dbManager.getMostRecentJobs).toHaveBeenCalledWith(1); // Limit is explicitly set to 1
     });
 });
