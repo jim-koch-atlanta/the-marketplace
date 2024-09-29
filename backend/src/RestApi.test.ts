@@ -96,6 +96,17 @@ describe('RestApi', () => {
         expect(dbManager.getJobs).toHaveBeenCalled();
     });
 
+    it('should handle errors when retrieving jobs', async () => {
+        // Mock dbManager.getJobs to throw an exception
+        dbManager.getJobs.mockRejectedValueOnce(new Error('Database error'));
+    
+        const response = await request(expressApi).get('/api/jobs');
+    
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ error: 'Internal server error' });
+        expect(dbManager.getJobs).toHaveBeenCalled();
+    });
+
     // GET /api/jobs/:id
     it('should return a job by ID', async () => {
         dbManager.getJobById.mockResolvedValueOnce(mockJob1);
@@ -104,6 +115,17 @@ describe('RestApi', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual(mockJob1);
+        expect(dbManager.getJobById).toHaveBeenCalledWith('job1');
+    });
+
+    it('should handle errors when retrieving a job by ID', async () => {
+        // Mock dbManager.getJobById to throw an exception
+        dbManager.getJobById.mockRejectedValueOnce(new Error('Database error'));
+    
+        const response = await request(expressApi).get('/api/jobs');
+    
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ error: 'Internal server error' });
         expect(dbManager.getJobById).toHaveBeenCalledWith('job1');
     });
 
@@ -127,6 +149,53 @@ describe('RestApi', () => {
 
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Bid placed successfully');
+        expect(dbManager.insertBid).toHaveBeenCalledWith(expect.objectContaining({
+            id: newBid.bidId,
+            jobId: 'job1',
+            amount: newBid.amount,
+            bidder: expect.objectContaining({ id: newBid.bidderId }),
+        }));
+    });
+
+    it('should fail to place a bid on a non-existent job', async () => {
+        // Mock the job retrieval.
+        dbManager.getJobById.mockResolvedValueOnce(null);
+
+        const newBid = {
+            bidId: 'bid1',
+            amount: '500',
+            bidderId: 'user2',
+        };
+
+        const response = await request(expressApi)
+            .post('/api/jobs/job1/bids')
+            .send(newBid);
+
+        expect(dbManager.getJobById).toHaveBeenCalledWith('job1');    
+        expect(response.status).toBe(404);
+        expect(response.body.message).toBe('Job not found');
+    });
+
+    it('should handle errors when placing a bid on a job', async () => {
+        // Mock the job retrieval.
+        dbManager.getJobById.mockResolvedValueOnce(mockJob1);
+
+        // Mock dbManager.insertBid to throw an exception
+        dbManager.insertBid.mockRejectedValueOnce(new Error('Database error'));
+
+        const newBid = {
+            bidId: 'bid1',
+            amount: '500',
+            bidderId: 'user2',
+        };
+
+        const response = await request(expressApi)
+            .post('/api/jobs/job1/bids')
+            .send(newBid);
+
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ error: 'Internal server error' });
+
         expect(dbManager.insertBid).toHaveBeenCalledWith(expect.objectContaining({
             id: newBid.bidId,
             jobId: 'job1',
@@ -161,22 +230,9 @@ describe('RestApi', () => {
         expect(dbManager.getMostActiveJobs).toHaveBeenCalledWith(10); // By default, limit is 10
     });
 
-    // GET /api/jobs without filter (default behavior)
-    it('should return all jobs if no filter is applied', async () => {
-        // Mock the database method for getting all jobs
-        dbManager.getJobs.mockResolvedValueOnce(mockJobs);
-
-        // Simulate a GET request to /api/jobs without any filter
-        const response = await request(expressApi).get('/api/jobs');
-
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual(mockJobs);
-        expect(dbManager.getJobs).toHaveBeenCalled();
-    });
-
     // GET /api/jobs with a limit in the query
     it('should return the correct number of jobs when limit is specified', async () => {
-        // Mock the database method for getting most recent jobs with limit
+        // Mock the database method for getting most recent jobs with limit.
         dbManager.getMostRecentJobs.mockResolvedValueOnce([ mockJob1 ]);
 
         // Simulate a GET request to /api/jobs?filter=most_recent&limit=1
