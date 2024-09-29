@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { DatabaseManager } from './DatabaseManager';
-import { Job, Bid } from './types';
+import { Job, Bid, User } from './types';
 
 export class RestApi {
     private expressApi = express();
@@ -30,6 +30,31 @@ export class RestApi {
 
         // Place a new bid on a job
         this.expressApi.post('/api/jobs/:id/bids', this.placeBid.bind(this));
+
+        // Create a new user
+        this.expressApi.post('/api/users', this.createUser.bind(this));
+    }
+
+    // POST /api/users: Create a new user
+    public async createUser(req: Request, res: Response) {
+        try {
+            const { id, name, emailAddress, phoneNumber } = req.body;
+            
+            const user: User = {
+                id,
+                name,
+                contactInfo: {
+                    emailAddress,
+                    phoneNumber
+                }
+            };
+
+            await this.dbManager.insertUser(user);
+            res.status(201).json({ message: 'User created successfully' });
+        } catch (error) {
+            console.error(`Error creating job: ${error}`);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 
     // POST /api/jobs: Create a new job
