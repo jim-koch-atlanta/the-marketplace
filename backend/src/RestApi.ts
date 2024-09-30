@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express, { Request, Response } from 'express';
 import { DatabaseManager } from './DatabaseManager';
 import { Job, Bid, User } from './types';
@@ -6,6 +7,9 @@ export class RestApi {
     private expressApi = express();
 
     constructor(private dbManager: DatabaseManager) {
+        this.expressApi.use(cors({
+            origin: ['http://localhost:8080', 'http://frontend:8080'],
+        }));
         this.expressApi.use(express.json()); // Middleware to parse JSON request bodies
         this.routes();
     }

@@ -60,8 +60,9 @@ See [backend.yaml](./backend.yaml) for the OpenAPI specification of this service
 The following next steps should be taken with this project:
 
 1. **General code cleanup.** See `TODO` comments in code.
-2. **Idempotence of API endpoints.** The `POST` commands will likely fail on a second attempt.
-3. **Switch from direct SQLite to ORM.** For scalability, the DatabaseManager code should utilize an ORM to allow for other database engines like Postgres. This would allow for replication and failover.
+2. **Disable CORS.** This was enabled short-term to support development efforts.
+3. **Idempotence of API endpoints.** The `POST` commands will likely fail on a second attempt.
+4. **Switch from direct SQLite to ORM.** For scalability, the DatabaseManager code should utilize an ORM to allow for other database engines like Postgres. This would allow for replication and failover.
 
 ## License
 
