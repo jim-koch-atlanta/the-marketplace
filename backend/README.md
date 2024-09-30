@@ -1,6 +1,6 @@
 # Express TypeScript SQLite Docker App
 
-This project is a simple Express.js API built with TypeScript that connects to a local SQLite database. The application is containerized using Docker.
+This project is a the backend for a job marketplace, allowing for users to submit available jobs and to bid on those jobs. It is simple Express.js API built with TypeScript that connects to a local SQLite database. The application is containerized using Docker.
 
 ## Prerequisites
 
@@ -12,8 +12,8 @@ Ensure you have the following installed on your machine:
 
 ### 1. Clone the Repository
 
-git clone https://github.com/your-repo/express-ts-sqlite-docker.git
-cd express-ts-sqlite-docker
+git clone https://github.com/jim-koch-atlanta/the-marketplace.git
+cd the-marketplace/backend
 
 ### 2. Install Dependencies
 
@@ -33,7 +33,7 @@ Run the application:
 
 `npm start`
 
-The application will be running on `http://localhost:3001`.
+The application will be running on `http://localhost:3000`.
 
 ### 5. Run the Application with Docker
 
@@ -41,54 +41,27 @@ The application will be running on `http://localhost:3001`.
 
 Build the Docker image:
 
-`docker build -t marketplace-takehome .`
+`docker build -t the-marketplace-backend .`
 
 **Run the Docker Container**
 
 Run the Docker container:
 
-`docker run -p 3001:3001 marketplace-takehome`
+`docker run -p 3000:3000 the-marketplace-backend`
 
-The application will be running on `http://localhost:3001`.
+The application will be running on `http://localhost:3000`.
 
 ## API Endpoints
 
-### Get Users
+See [backend.yaml](./backend.yaml) for the OpenAPI specification of this service.
 
-- URL: `/users`
-- Method: GET
-- Response: List of users
+## Next Steps
 
-### Add User
+The following next steps should be taken with this project:
 
-- URL: `/users`
-- Method: POST
-- Body:
-  `{
-  "id": number,
-  "name": string
-  }`
-- Response: `{"message": "User added"}`
-
-### Delete User
-
-- URL: `/users/:id`
-- Method: DELETE
-- Response: `{"message": "User deleted"}`
-
-## Example Usage
-
-### Get Users
-
-`curl http://localhost:3001/users`
-
-### Add User
-
-`curl -X POST -H "Content-Type: application/json" -d '{"id": 2, "name": "Jane Doe"}' http://localhost:3001/users`
-
-### Delete User
-
-`curl -X DELETE http://localhost:3001/users/2`
+1. **General code cleanup.** See `TODO` comments in code.
+2. **Idempotence of API endpoints.** The `POST` commands will likely fail on a second attempt.
+3. **Switch from direct SQLite to ORM.** For scalability, the DatabaseManager code should utilize an ORM to allow for other database engines like Postgres. This would allow for replication and failover.
 
 ## License
 
