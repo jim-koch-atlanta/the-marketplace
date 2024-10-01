@@ -1,4 +1,4 @@
-const REACT_APP_BACKEND_URL = 'http://localhost:3000/api'
+const REACT_APP_BACKEND_URL = 'http://127.0.0.1:3000/api'
 
 export const backendUrl = REACT_APP_BACKEND_URL;
 
