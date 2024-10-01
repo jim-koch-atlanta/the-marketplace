@@ -6,6 +6,7 @@ import { backendUrl, Job } from '../../backend';
 interface JobListProps {
   title: string;
   filter: string;
+  onJobSelected: any;
 }
 
 export const JobList: React.FC<JobListProps> = (props: JobListProps) => {
@@ -32,7 +33,7 @@ export const JobList: React.FC<JobListProps> = (props: JobListProps) => {
     <div className="job-list">
       <h2>{props.title}</h2>
       {jobs.map((job) => (
-        <JobCard key={job.id} description={job.description} posterName={job.poster.id} />
+        <JobCard key={job.id} job={job} onJobSelect={props.onJobSelected} />
       ))}
     </div>
   );

@@ -1,7 +1,7 @@
 .job-card {
     font-family: 'Roboto', sans-serif; /* Use the Roboto font */
     border: 2px solid #ddd;
-    border-radius: 10px; /* Rounded corners */
+    border-radius: 8px; /* Rounded corners */
     padding: 10px;
     max-width: 300px;
     margin: 10px;
@@ -34,7 +34,7 @@
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
