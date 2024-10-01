@@ -15,7 +15,7 @@ export const JobList: React.FC<JobListProps> = (props: JobListProps) => {
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const url = `http://localhost:3000/api/jobs?filter=${props.filter}&limit=5`;
+      const url = `${backendUrl}/jobs?filter=${props.filter}&limit=5`;
       const response = await fetch(url);
       const data = await response.json();
       setJobs(data);

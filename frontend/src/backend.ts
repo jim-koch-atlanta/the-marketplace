@@ -30,3 +30,25 @@ export type Bid = {
   amount: string;
   bidder: User;
 };
+
+// TODO: Utilize IAM / OAuth to support an actual user.
+const axios = require('axios');
+
+// Define your default user payload
+export const defaultUser = {
+  id: 'default-user-id',
+  name: 'Jim Koch',
+  emailAddress: 'jimkoch@gmail.com',
+};
+
+// Function to create the default user on startup
+export const createDefaultUser = async () => {
+  try {
+    // Make the POST request to the /api/users endpoint
+    const url = `${backendUrl}/users`;
+    const response = await axios.post(url, defaultUser);
+    console.log('Default user created:', response.data);
+  } catch (error) {
+    console.error(`Error creating default user:, ${JSON.stringify(error)}`);
+  }
+};

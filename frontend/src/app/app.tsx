@@ -1,9 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import './app.module.css';
-import JobList from '../../src/components/job-list/job-list';
-
 import React, {useState} from 'react';
-import { Job } from 'src/backend';
+
+import { Job, createDefaultUser } from '../backend';
+import JobList from '../../src/components/job-list/job-list';
+import JobDetailsPanel from '../../src/components/job-details/job-details';
 
 export function App() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null); // Track selected job
@@ -11,6 +12,8 @@ export function App() {
   const handleJobSelect = (job: any) => {
     setSelectedJob(job); // Set the selected job when "More" is clicked
   };
+
+  createDefaultUser();
 
   return (
     <div className="job-list-container">
@@ -22,14 +25,9 @@ export function App() {
       </div>
 
       {/* Job Details Panel */}
-      {selectedJob && (
-        <div className="job-details-panel">
-          <h2>{selectedJob.description}</h2>
-          <p>Posted by: {selectedJob.poster.name}</p>
-          <p>Requirements: {JSON.stringify(selectedJob.requirements)}</p>
-          {/* Add more job details here as needed */}
-        </div>
-      )}      
+      {selectedJob &&
+        <JobDetailsPanel selectedJob={selectedJob} />
+      }      
     </div>
   );
 }
