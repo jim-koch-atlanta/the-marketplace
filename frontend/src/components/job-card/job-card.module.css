@@ -8,7 +8,10 @@
     background-color: #f9f9f9;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     transition: box-shadow 0.3s ease-in-out;
-  }
+
+    width: 100%; /* Adjust the width as needed */
+    margin-bottom: 20px; /* Add some space between rows */
+}
   
   .job-card:hover {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Slight hover effect */

@@ -1,0 +1,9 @@
+.job-list-container {
+  display: flex;              /* Flexbox for horizontal alignment */
+  gap: 10px;                  /* Adds 10px of space between the job-list-item elements */
+}
+
+.job-list-item {
+  width: 25%;                 /* Set width of each job list */
+  box-sizing: border-box;      /* Include padding and borders in the width */
+}

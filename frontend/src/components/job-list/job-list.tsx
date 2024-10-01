@@ -3,42 +3,37 @@ import JobCard from '../job-card/job-card';
 import './job-list.module.css';
 import { backendUrl, Job } from '../../backend';
 
-export const JobList: React.FC = () => {
-  const [jobs, setJobs] = useState<Job[] | null>(null);  // Holds the job data
-  const [loading, setLoading] = useState(true);  // Holds loading state
+interface JobListProps {
+  title: string;
+  filter: string;
+}
 
-  // Fetch the jobs from the backend when the component mounts
+export const JobList: React.FC<JobListProps> = (props: JobListProps) => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchJobs = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/api/jobs?filter=most_recent&limit=5`);
-        const data = await response.json();
-        setJobs(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching jobs:', error);
-        setLoading(false);
-      }
+      const url = `http://localhost:3000/api/jobs?filter=${props.filter}&limit=5`;
+      const response = await fetch(url);
+      const data = await response.json();
+      setJobs(data);
+      setLoading(false);
     };
 
     fetchJobs();
-  }, []);
+  }, [props.filter]);
 
-  // Render a loading spinner if the data is still loading
   if (loading) {
-    return <div className="spinner">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
-  // Render the jobs once the data has loaded
   return (
     <div className="job-list">
-      {jobs && jobs.length > 0 ? (
-        jobs.map((job) => (
-          <JobCard key={job.id} description={job.description} posterName={job.poster.id} />
-        ))
-      ) : (
-        <p>No jobs available</p>
-      )}
+      <h2>{props.title}</h2>
+      {jobs.map((job) => (
+        <JobCard key={job.id} description={job.description} posterName={job.poster.id} />
+      ))}
     </div>
   );
 };
